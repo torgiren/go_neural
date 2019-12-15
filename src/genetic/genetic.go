@@ -2,6 +2,7 @@ package genetic
 import "math/rand"
 import "time"
 import "fmt"
+import "sort"
 
 type Genome struct {
     genome_len int
@@ -18,7 +19,7 @@ func createGenome(genome_len int) *Genome{
     var g Genome
     g.genome_len = genome_len
     for i := 0; i< g.genome_len; i++ {
-        g.genome = append(g.genome, rand.Intn(255))
+        g.genome = append(g.genome, rand.Intn(510)- 255)
     }
     return &g
 }
@@ -50,4 +51,12 @@ func GetIndividuals(pop *Population) []*Genome{
 
 func (genome *Genome) SetFitness(value int) {
     genome.fitness = value
+}
+
+func (genome *Genome) GetGenome() []int {
+    return genome.genome
+}
+
+func SortPopulation(pop *Population) {
+    sort.Slice(pop.individuals, func(i int,j int) bool { return pop.individuals[i].fitness < pop.individuals[j].fitness})
 }

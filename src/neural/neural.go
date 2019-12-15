@@ -149,7 +149,7 @@ func LoadNetwork(net *Network, data []int) int {
 }
 
 func CalcNetwork(net *Network, inputs []int) []int {
-    fmt.Println("calc")
+//    fmt.Println("calc")
     if len(inputs) != net.inputs_num {
         fmt.Println("ERROR: input values len differ from network inputs num: inputs_values len ", len(inputs), ", inputs_num ", net.inputs_num)
         return []int{-1}
@@ -175,7 +175,7 @@ func calcNeuron(neuron *neuron) int {
     return sigmoid(result)
 }
 func sigmoid(val int) int {
-    var result int = int(1.0 / (1 + math.Exp(-1.0*(float64(val)/5))) * 255)
+    var result int = int(1.0 / (1 + math.Exp(-1.0*(float64(val)/255))) * 255)
     return result
 }
 

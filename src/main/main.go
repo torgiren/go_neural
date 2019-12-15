@@ -4,9 +4,27 @@ import "fmt"
 import "genetic"
 import "sync"
 
-func calcFitness(wg *sync.WaitGroup, genome *genetic.Genome, nets []*neural.Network, id int) int {
+func calcFitness(wg *sync.WaitGroup, genome *genetic.Genome, nets []*neural.Network, i int, inputs [][]int, outputs [][]int) int {
     defer wg.Done()
-    genome.SetFitness(2)
+    var points = 255 * len(inputs) * len(inputs[0])
+    var calc []int
+    var penalty int
+    var diff int
+    neural.LoadNetwork(nets[i], genome.GetGenome())
+    for j,v := range inputs {
+        penalty = 0
+        calc = neural.CalcNetwork(nets[i],v)
+        for k,v2 := range calc {
+            diff = v2 - outputs[j][k]
+            if diff < 0 {
+                diff *= -1
+            }
+            penalty += diff
+        }
+        points -= penalty
+//        fmt.Println(inputs[j], calc, outputs[j], penalty, points)
+    }
+    genome.SetFitness(points)
     return 0
 }
 
@@ -34,6 +52,10 @@ func main() {
 //    neural.PrintNet1(net)
 
 //    fmt.Println(neural.GetNetworkLen(nets[0]))
+
+    var test_input [][]int = [][]int{ {3,4},{20,4},{8,30}, {30,42}, {200,34}, {255, 2}, {243, 22}, {212, 23}, {30, 250}, {24, 223}, {2, 210}, {9,239} }
+    var test_output [][]int = [][]int{ {255,127}, {255, 127}, {255,127},{255,127}, {127,255}, {127,255}, {127,255},{127,255}, {127,255},{127,255}, {127,255}, {127,255} }
+
     var pop *genetic.Population = genetic.CreatePopulation(pop_size, neural.GetNetworkLen(nets[0]))
     fmt.Println(pop)
     genetic.PrintPopulation(pop)
@@ -43,8 +65,9 @@ func main() {
 
     for i, v := range genetic.GetIndividuals(pop) {
         wg.Add(1)
-        go calcFitness(&wg, v, nets, i)
+        go calcFitness(&wg, v, nets, i, test_input, test_output)
     }
     wg.Wait()
+    genetic.SortPopulation(pop)
     genetic.PrintPopulation(pop)
 }
