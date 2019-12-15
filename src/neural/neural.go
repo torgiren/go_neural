@@ -105,10 +105,14 @@ func DumpNetwork(net *Network) []int {
     return dump
 }
 
-func LoadNetwork(net *Network, data []int) int {
+func GetNetworkLen(net *Network) int {
     var net_len int = net.inputs_num * net.hiddens_size + net.hiddens_size +
                       net.hiddens_size * net.hiddens_size * (net.hiddens_num - 1) + net.hiddens_size * (net.hiddens_num - 1) +
                       net.outputs_num * net.hiddens_size + net.outputs_num
+    return net_len
+}
+func LoadNetwork(net *Network, data []int) int {
+    var net_len int = GetNetworkLen(net)
     if len(data) != net_len {
         fmt.Println("ERROR: data len differ from network len: data_len ", len(data), ", net_len ", net_len)
         return -1

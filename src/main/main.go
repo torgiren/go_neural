@@ -1,26 +1,50 @@
 package main
 import "neural"
 import "fmt"
+import "genetic"
+import "sync"
 
+func calcFitness(wg *sync.WaitGroup, genome *genetic.Genome, nets []*neural.Network, id int) int {
+    defer wg.Done()
+    genome.SetFitness(2)
+    return 0
+}
 
 func main() {
     var input_num = 2;
     var hidden_num = 1;
     var hidden_size = 4;
     var output_num = 2;
-    var net *neural.Network = neural.NewNetwork(input_num, hidden_num, hidden_size, output_num)
-    if neural.LoadNetwork(net, []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1,1,1,1}) != 0 {
-    //if neural.LoadNetwork(net, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,17, 18,19,20,21}) != 0 {
-    //if neural.LoadNetwork(net, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}) != 0 {
-        fmt.Println("ERROR: Load error")
-        return
+    var pop_size = 10
+    var nets []*neural.Network
+    for i := 0; i< pop_size; i++ {
+        nets = append(nets, neural.NewNetwork(input_num, hidden_num, hidden_size, output_num))
     }
-    neural.PrintNet1(net)
-    fmt.Println("dump: ", neural.DumpNetwork(net))
-    fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
-    neural.LoadNetwork(net, []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0,0,0,0})
-    fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
-    neural.LoadNetwork(net, []int{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,-1, -1,-1,-1,-1})
-    fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
+//    if neural.LoadNetwork(net, []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1,1,1,1}) != 0 {
+//        fmt.Println("ERROR: Load error")
+//        return
+//    }
 //    neural.PrintNet1(net)
+//    fmt.Println("dump: ", neural.DumpNetwork(net))
+//    fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
+ //   neural.LoadNetwork(net, []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0,0,0,0})
+ //   fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
+ //   neural.LoadNetwork(net, []int{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,-1, -1,-1,-1,-1})
+ //   fmt.Println("calc: ", neural.CalcNetwork(net, []int{1, 1}))
+//    neural.PrintNet1(net)
+
+//    fmt.Println(neural.GetNetworkLen(nets[0]))
+    var pop *genetic.Population = genetic.CreatePopulation(pop_size, neural.GetNetworkLen(nets[0]))
+    fmt.Println(pop)
+    genetic.PrintPopulation(pop)
+    fmt.Println(genetic.GetIndividuals(pop))
+
+    var wg sync.WaitGroup
+
+    for i, v := range genetic.GetIndividuals(pop) {
+        wg.Add(1)
+        go calcFitness(&wg, v, nets, i)
+    }
+    wg.Wait()
+    genetic.PrintPopulation(pop)
 }
