@@ -1,5 +1,6 @@
-package main
+package neural
 import "fmt"
+import "math"
 //import "strconv"
 
 type neuron struct {
@@ -12,7 +13,7 @@ type layer struct {
     neurons []* neuron
 }
 
-type network struct {
+type Network struct {
     inputs *layer
     hiddens []*layer
     outputs *layer
@@ -44,8 +45,8 @@ func newLayer(size int, parent *layer) *layer {
     return &l
 }
 
-func newNetwork(inputs_num, hiddens_num, hiddens_size, outputs_num int) *network {
-    var n network
+func NewNetwork(inputs_num, hiddens_num, hiddens_size, outputs_num int) *Network {
+    var n Network
     n.inputs_num = inputs_num
     n.hiddens_num = hiddens_num
     n.hiddens_size = hiddens_size
@@ -68,7 +69,7 @@ func newNetwork(inputs_num, hiddens_num, hiddens_size, outputs_num int) *network
     return &n
 }
 
-func printNet1(net *network) {
+func PrintNet1(net *Network) {
     fmt.Println(net)
     fmt.Println("inputs", net.inputs)
     for i,v := range net.inputs.neurons {
@@ -89,7 +90,7 @@ func printNet1(net *network) {
     }
 }
 
-func dumpNetwork(net *network) []int {
+func DumpNetwork(net *Network) []int {
     var dump []int
     for _, v := range net.hiddens {
         for _, v2 := range v.neurons {
@@ -104,12 +105,10 @@ func dumpNetwork(net *network) []int {
     return dump
 }
 
-func loadNetwork(net *network, data []int) int {
-    fmt.Println("data len: ", len(data))
+func LoadNetwork(net *Network, data []int) int {
     var net_len int = net.inputs_num * net.hiddens_size + net.hiddens_size +
                       net.hiddens_size * net.hiddens_size * (net.hiddens_num - 1) + net.hiddens_size * (net.hiddens_num - 1) +
                       net.outputs_num * net.hiddens_size + net.outputs_num
-    fmt.Println("net len:", net_len)
     if len(data) != net_len {
         fmt.Println("ERROR: data len differ from network len: data_len ", len(data), ", net_len ", net_len)
         return -1
@@ -122,7 +121,6 @@ func loadNetwork(net *network, data []int) int {
 //    fmt.Println(hidden_start)
 
 
-    fmt.Println("AAAA")
     var pos int = 0
     for i := 0; i<net.hiddens_num; i++ {
         var prev *layer
@@ -131,7 +129,6 @@ func loadNetwork(net *network, data []int) int {
         } else {
             prev = net.hiddens[i-1]
         }
-        fmt.Println(prev)
         for _, v2 := range net.hiddens[i].neurons {
             v2.values = data[pos:pos+len(prev.neurons)]
             v2.bias = data[pos+len(prev.neurons)]
@@ -143,23 +140,38 @@ func loadNetwork(net *network, data []int) int {
         v.bias = data[pos+net.hiddens_size]
         pos+=net.hiddens_size+1
     }
-    fmt.Println("BBBB")
-
-
 
     return 0
 }
 
-func main() {
-    var input_num = 3;
-    var hidden_num = 3;
-    var hidden_size = 5;
-    var output_num = 2;
-    var net *network = newNetwork(input_num, hidden_num, hidden_size, output_num)
-    if loadNetwork(net, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}) != 0 {
-        fmt.Println("ERROR: Load error")
-        return
+func CalcNetwork(net *Network, inputs []int) []int {
+    fmt.Println("calc")
+    if len(inputs) != net.inputs_num {
+        fmt.Println("ERROR: input values len differ from network inputs num: inputs_values len ", len(inputs), ", inputs_num ", net.inputs_num)
+        return []int{-1}
     }
-    printNet1(net)
-    fmt.Println("dump: ", dumpNetwork(net))
+    for i, v := range net.inputs.neurons {
+        v.bias = inputs[i]
+    }
+    var result []int = make([]int, net.outputs_num)
+    for i := 0; i<net.outputs_num; i++ {
+        result[i] = calcNeuron(net.outputs.neurons[i])
+    }
+    return result
 }
+
+func calcNeuron(neuron *neuron) int {
+    var result int = neuron.bias
+    if neuron.input {
+        return result
+    }
+    for i := 0; i<len(neuron.synapses); i++ {
+        result += neuron.values[i] * calcNeuron(neuron.synapses[i])
+    }
+    return sigmoid(result)
+}
+func sigmoid(val int) int {
+    var result int = int(1.0 / (1 + math.Exp(-1.0*(float64(val)/5))) * 255)
+    return result
+}
+
