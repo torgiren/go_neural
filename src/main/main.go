@@ -33,7 +33,8 @@ func main() {
     var hidden_num = 1;
     var hidden_size = 4;
     var output_num = 2;
-    var pop_size = 10
+    var pop_size = 200
+    var gen_number = 5000
     var nets []*neural.Network
     for i := 0; i< pop_size; i++ {
         nets = append(nets, neural.NewNetwork(input_num, hidden_num, hidden_size, output_num))
@@ -63,11 +64,21 @@ func main() {
 
     var wg sync.WaitGroup
 
-    for i, v := range genetic.GetIndividuals(pop) {
-        wg.Add(1)
-        go calcFitness(&wg, v, nets, i, test_input, test_output)
+    for gen := 0; gen<=gen_number; gen++ {
+        for i, v := range genetic.GetIndividuals(pop) {
+            wg.Add(1)
+            go calcFitness(&wg, v, nets, i, test_input, test_output)
+        }
+        wg.Wait()
+        genetic.SortPopulation(pop)
+        if gen % 10 == 0 {
+            genetic.PrintBest(pop)
+        }
+        //if gen == 0 || gen == 500{
+        //    genetic.PrintPopulation(pop)
+        //}
+        //genetic.PrintBest(pop)
+        //genetic.PrintPopulation(pop)
+        pop = genetic.Reproduce(pop)
     }
-    wg.Wait()
-    genetic.SortPopulation(pop)
-    genetic.PrintPopulation(pop)
 }
