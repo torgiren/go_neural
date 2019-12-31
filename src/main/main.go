@@ -1,6 +1,6 @@
 package main
 import "neural"
-import "fmt"
+//import "fmt"
 import "genetic"
 import "sync"
 
@@ -58,9 +58,9 @@ func main() {
     var test_output [][]int = [][]int{ {255,127}, {255, 127}, {255,127},{255,127}, {127,255}, {127,255}, {127,255},{127,255}, {127,255},{127,255}, {127,255}, {127,255} }
 
     var pop *genetic.Population = genetic.CreatePopulation(pop_size, neural.GetNetworkLen(nets[0]))
-    fmt.Println(pop)
-    genetic.PrintPopulation(pop)
-    fmt.Println(genetic.GetIndividuals(pop))
+    //fmt.Println(pop)
+    ////genetic.PrintPopulation(pop)
+    //fmt.Println(genetic.GetIndividuals(pop))
 
     var wg sync.WaitGroup
 
