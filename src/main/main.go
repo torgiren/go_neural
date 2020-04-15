@@ -30,11 +30,11 @@ func calcFitness(wg *sync.WaitGroup, genome *genetic.Genome, nets []*neural.Netw
 
 func main() {
     var input_num = 2;
-    var hidden_num = 1;
-    var hidden_size = 4;
+    var hidden_num = 4;
+    var hidden_size = 6;
     var output_num = 2;
     var pop_size = 200
-    var gen_number = 5000
+    var gen_number = 10000
     var nets []*neural.Network
     for i := 0; i< pop_size; i++ {
         nets = append(nets, neural.NewNetwork(input_num, hidden_num, hidden_size, output_num))
